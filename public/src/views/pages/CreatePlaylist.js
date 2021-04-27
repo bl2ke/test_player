@@ -1,36 +1,13 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Creating playlist</title>
-        <link rel="stylesheet" href="style/headerStyle.css">
-        <link rel="stylesheet" href="style/footerStyle.css">
-        <link rel="stylesheet" href="style/authStyle.css">
-        <link rel="stylesheet" href="style/basicStyle.css">
-        <link rel="stylesheet" href="style/playlistStyle.css">
-        <link rel="stylesheet" href="style/upload.css">
-    </head>
-    <body>
-        <header>
-            <div class="header-left-part">
-                <a class="header-cite-name" href="../index.html">Vitafy</a>
-                <input class="header-search" placeholder="Search">
-            </div>
-
-            <div class="header-right-part">
-                <a class="header-button" href="login.html">Login</a>
-                <a class="header-button" href="registration.html">Register</a>
-            </div>
-        </header>
-        <main class="main-container">
-            <section class="playlist-container">
+let CreatePlaylist = {
+    render: async() => {
+        let view =`
+        <section class="playlist-container">
                 <h1 class="edit-header">Creating playlist</h1>
                 <div>
                     <div class="playlist-edit-header">
                         <div class="playlist-header-img">
                             <div>
-                                <img class="playlist-image" src="img/empty_image.png">
+                                <img class="playlist-image" src="src/img/empty_image.png">
                             </div>
                         </div>
                         <div class="playlist-info">
@@ -65,14 +42,13 @@
                 <input class="playlist-search" placeholder="Search">
                 <ul class="playlist-songs"></ul> 
             </section>
-        </main>
-        <footer class="footer-container">
-            <div class="info-block">
-                <p>Contacts:</p>
-                <a href="https://vk.com/forbzzz">VK</a>
-            </div>
-        </footer>
+        `
 
+        return view
+    },
 
-    </body>
-</html>
+    after_render: async() => {}
+  
+}
+
+export default CreatePlaylist;
