@@ -9,6 +9,9 @@ import Playlist from './src/views/pages/Playlist.js'
 import CreatePlaylist from './src/views/pages/CreatePlaylist.js'
 import Upload from './src/views/pages/Upload.js'
 import Search from './src/views/pages/Search.js'
+import Artist from './src/views/pages/Artist.js'
+import Genre from './src/views/pages/Genre.js'
+import Album from './src/views/pages/Album.js'
 
 const routes = {
     '/' : Home,
@@ -19,7 +22,13 @@ const routes = {
     '/createplaylist' : CreatePlaylist,
     '/playlist' : Playlist,
     '/search' : Search,
-    '/search/:id' : Search
+    '/search/:id' : Search,
+    '/artist' : Artist,
+    '/artist/:id' : Artist,
+    '/genre' : Genre,
+    '/genre/:id' : Genre,
+    '/album' : Album,
+    '/album/:id' : Album
 };
 
 const router = async() => {
@@ -42,16 +51,12 @@ const router = async() => {
        routes[location.hash.slice(1).toLowerCase() || '/'] ? (location.hash.slice(1).toLowerCase() || '/') :
     ((url.resourse ? '/' + url.resourse : '/') + (url.id ? '/:id' : '') + (url.verb ? '/' + url.verb : ''))
     console.log("Первый урл: ",parsedURL2)
-    //let parsedURL = (url.resource ? '/' + url.resource : '/') + (url.id ? '/:id' : '') + (url.verb ? '/' + url.verb : '')
-    //console.log("Второй урл: ",parsedURL)
-    //console.log(parsedURL);
-    //console.log(routes[parsedURL])
 
     let page = routes[parsedURL2];
-    //console.log(page);
+    console.log(page);
     main.innerHTML = await page.render();
     await page.after_render();
-    //const snapshot = await firebase.database().ref('/songs');
+
 
 
 }

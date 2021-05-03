@@ -3,8 +3,6 @@ import * as DB from './../../services/DB.js'
 
 let Search = {
     render : async() => {
-        let request = Utils.parseRequestURL();
-        let query = decodeURIComponent(request.id);
 
         return `
         <section class="search-results-section">
@@ -13,7 +11,7 @@ let Search = {
             <ul id="search-results" class="playlist-songs"></ul> 
             <div id="myModal" class="modal">
                 <div class="modal-header">
-                    <span class="close">&times;</span>
+                    <span id="close" class="close">&times;</span>
                 </div>
                 <div class="modal-content">
                     <div class="modal-body">
@@ -30,22 +28,18 @@ let Search = {
         let query = decodeURIComponent(request.id);
         const h2 = document.getElementById('section-search-h2');
         const lyrics = document.getElementById('song-lyrics');
-
-        var modal = document.getElementById('myModal');
-        var btn;
-        var span = document.getElementsByClassName("close")[0];
-
-        h2.innerHTML = "Search results for " + query;
         const searchContainer = document.getElementById("search-results");
+        var modal = document.getElementById('myModal');
+        var span = document.getElementById("close");
 
-        const snapshot = await firebase.database().ref('/songs');
-        snapshot.on("value", async function(snapshot){
-            let songList = snapshot.val();
-            songList.forEach(async function(itemRef, index)
+        h2.innerHTML = "Results for " + query;
+    
+        const songList2 = await DB.getItems('songs');
+        songList2.forEach(async function(song, index)
             {
-                if(itemRef.name.toLowerCase().includes(query) || itemRef.author.toLowerCase().includes(query))
+                if(song.name.toLowerCase().includes(query) || song.author.toLowerCase().includes(query))
                 {
-                    const picUrl = await DB.getSongPic(itemRef.picture);
+                    let picUrl = await DB.getSongPic(song.picture);
                     let songLi = document.createElement("li");
                     songLi.className = "playlist-songs-item"
                     songLi.innerHTML = 
@@ -57,8 +51,8 @@ let Search = {
                                         <img id=${index} class="song-play-image" src="src/img/Play.png">
                                     </button>
                                 </div>
-                                <p class="song-name">${itemRef.name}</p>
-                                <a href="#" class="song-author">${itemRef.author}</a>
+                                <p class="song-name">${song.name}</p>
+                                <a href="#/artist/${song.author}" class="song-author">${song.author}</a>
                             </div>
                             <div class="playlist-song-duration">
                                 <p class="duration">2:33</p>
@@ -70,17 +64,58 @@ let Search = {
                     searchContainer.appendChild(songLi);
                 }
             });
-        }),function(e){
-            console.log("Fail:",e.code);
-        }
 
+        // snapshot.on("value", async function(snapshot){
+        //     let songList = snapshot.val();
+        //     songList.forEach(async function(song, index)
+        //     {
+        //         if(song.name.toLowerCase().includes(query) || song.author.toLowerCase().includes(query))
+        //         {
+        //             const picUrl = await DB.getSongPic(song.picture);
+        //             let songLi = document.createElement("li");
+        //             songLi.className = "playlist-songs-item"
+        //             songLi.innerHTML = 
+        //             `
+        //                     <div class="playlist-song">
+        //                         <div class="playlist-song-image">
+        //                             <button class="song-play-button">
+        //                                 <img class="song-image" src=${picUrl}>
+        //                                 <img id=${index} class="song-play-image" src="src/img/Play.png">
+        //                             </button>
+        //                         </div>
+        //                         <p class="song-name">${song.name}</p>
+        //                         <a href="#/artist/${song.author}" class="song-author">${song.author}</a>
+        //                     </div>
+        //                     <div class="playlist-song-duration">
+        //                         <p class="duration">2:33</p>
+        //                         <button id=${index} class="song-text-button">
+        //                             <img id="text-${index}" class="song-text" src="src/img/text.png">
+        //                         </button>
+        //                     </div>
+        //             `;
+        //             searchContainer.appendChild(songLi);
+        //         }
+        //     });
+        // }),function(e){
+        //     console.log("Fail:",e.code);
+        // }
+
+        console.log("Проверка")
+        // добавить воспроизвидение по кнопке
         searchContainer.addEventListener("click", async function(e)
         {
-            let id = e.target.id.split("-")[1];
-            let song = await DB.getItems('songs/'+ id);
-            console.log(song); 
-            lyrics.innerHTML = song.lyrics;           
-            modal.style.display = "block";
+            if(e.target.id.includes("text"))
+            {
+                let id = e.target.id.split("-")[1];
+                let song = await DB.getItems('songs/'+ id);
+                //console.log(song); 
+                lyrics.innerHTML = song.lyrics;           
+                modal.style.display = "block";
+            }
+            if(e.target.className == "song-play-image")
+            {
+                console.log("Кнопка воспроизведения");
+            }
         })
 
         span.onclick = function() {
@@ -92,6 +127,7 @@ let Search = {
                 modal.style.display = "none";
             }
         }
+
     }
     
 }

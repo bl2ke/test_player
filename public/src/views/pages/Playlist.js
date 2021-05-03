@@ -91,16 +91,15 @@ let Playlist = {
             </ul>
         </div>
         <div id="myModal" class="modal">
-            <div class="modal-content">
                 <div class="modal-header">
-                <span class="close">&times;</span>
+                    <span id="close" class="close">&times;</span>
                 </div>
+                <div class="modal-content">
                     <div class="modal-body">
-                    <p>Какой-то текст в теле модального окна</p>
-                    <p>Ещё другой текст...</p>
+                        <pre id="song-lyrics"></pre>
                     </div>
+                </div>
             </div>
-        </div>
     </section>
         `
 
@@ -110,7 +109,7 @@ let Playlist = {
     after_render: async() => {
         var modal = document.getElementById('myModal');
         var btn = document.getElementsByClassName("song-text")[0];
-        var span = document.getElementsByClassName("close")[0];
+        var span = document.getElementById("close");
 
 
         btn.onclick = function() {

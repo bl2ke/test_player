@@ -2,6 +2,7 @@ import * as DB from '../../services/DB.js'
 
 let Upload = {
     render: async() => {
+
         let view =`
         <section class="upload-section">
             <h1>Upload song</h1>
@@ -28,24 +29,24 @@ let Upload = {
             <label class="upload-label">Select genre</label>
             <ul id="1" class="genre-selection-list">
                 <li class="genre-selection-item">
-                    <input id="genre-selection1" value="Жанр1" name="genre" class="genre-selection" type="radio">
-                    <label class="genre-selection-label" for="genre-selection1">Жанр#1</label>
+                    <input id="genre-selection1" value=Rap/Hip-hop" name="genre" class="genre-selection" type="radio">
+                    <label class="genre-selection-label" for="genre-selection1">Rap/Hip-hop</label>
                 </li>
                 <li class="genre-selection-item">
-                    <input id="genre-selection2" name="genre" class="genre-selection" type="radio">
-                    <label class="genre-selection-label" for="genre-selection2">Жанр#2</label>
+                    <input id="genre-selection2" value="Rock" name="genre" class="genre-selection" type="radio">
+                    <label class="genre-selection-label" for="genre-selection2">Rock</label>
                 </li>
                 <li class="genre-selection-item">
-                    <input id="genre-selection3" name="genre" class="genre-selection" type="radio">
-                    <label class="genre-selection-label" for="genre-selection3">Жанр#3</label>
+                    <input id="genre-selection3" value="Pop" name="genre" class="genre-selection" type="radio">
+                    <label class="genre-selection-label" for="genre-selection3">Pop</label>
                 </li>
                 <li class="genre-selection-item">
-                    <input id="genre-selection4" name="genre" class="genre-selection" type="radio">
-                    <label class="genre-selection-label" for="genre-selection4">Жанр#4</label>
+                    <input id="genre-selection4" value="Metal" name="genre" class="genre-selection" type="radio">
+                    <label class="genre-selection-label" for="genre-selection4">Metal</label>
                 </li>
                 <li class="genre-selection-item">
-                    <input id="genre-selection5" name="genre" class="genre-selection" type="radio">
-                    <label class="genre-selection-label" for="genre-selection5">Жанр#5</label>
+                    <input id="genre-selection5" value="Alternative" name="genre" class="genre-selection" type="radio">
+                    <label class="genre-selection-label" for="genre-selection5">Alternative</label>
                 </li>
             </ul>
             <button id="upload-button" class="upload-button">Upload</button>
@@ -98,7 +99,7 @@ let Upload = {
             pic_id = songs.length;
             song_id = songs.length;
         }
-        console.log("Длинна массива песен: ",song_id);
+        console.log("Длинна массива песен: ", song_id);
 
 
         uploadButton.addEventListener('click', e => {
@@ -126,7 +127,10 @@ let Upload = {
                     }
                 }
                 console.log(selectedValue);
-                song_lyric = lyricsInput.value;
+                if(lyricsInput.value)
+                {
+                    song_lyric = lyricsInput.value;
+                }
 
                 firebase.database().ref('songs/' + song_id).set({
                     name: nameInput.value,
@@ -138,10 +142,9 @@ let Upload = {
                 }, function(error) {
                     if (error) {
                         alert(error.message);
-                    } else {
-                        console.log('data saved succsessfully!');
                     }
                 });
+                document.location.href = "#/";
 
             }
             else
