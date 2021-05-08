@@ -29,7 +29,7 @@ let Upload = {
             <label class="upload-label">Select genre</label>
             <ul id="1" class="genre-selection-list">
                 <li class="genre-selection-item">
-                    <input id="genre-selection1" value=Rap/Hip-hop" name="genre" class="genre-selection" type="radio">
+                    <input id="genre-selection1" value="Rap/Hip-hop" name="genre" class="genre-selection" type="radio">
                     <label class="genre-selection-label" for="genre-selection1">Rap/Hip-hop</label>
                 </li>
                 <li class="genre-selection-item">
@@ -60,15 +60,16 @@ let Upload = {
         
         const fileButton = document.getElementById('upload-song');
         const pictureButton = document.getElementById('upload-img');
-
         const uploadButton = document.getElementById('upload-button');
         const fileName = document.getElementById('file-name');
         const pictureName = document.getElementById('file-img-name');
-
         const nameInput = document.getElementById('name');
         const authorInput = document.getElementById('author');
         const lyricsInput = document.getElementById('lyrics');
+        const songs = await DB.getItems('songs');
 
+        let pic_id = 0;
+        let song_id;
         let file = null;
         let picture = "null";
         let song_lyric = "Empty";
@@ -76,57 +77,49 @@ let Upload = {
         fileButton.addEventListener('change', (event) => {
             file = event.target.files[0];
             fileName.innerHTML = file.name;
-            console.log(file);
+
         });
 
         pictureButton.addEventListener('change', (event) => {
             picture = event.target.files[0];
             pictureName.innerHTML = picture.name;
-            console.log(picture);
+            pic_id = songs.length;
+
         });
 
-        const songs = await DB.getItems('songs');
-        console.log(songs);
-        let pic_id;
-        let song_id;
         if(songs == null)
         {
-            pic_id = 0;
             song_id = 0;
         }
         else
         {
-            pic_id = songs.length;
             song_id = songs.length;
         }
-        console.log("Длинна массива песен: ", song_id);
 
-
-        uploadButton.addEventListener('click', e => {
+        uploadButton.addEventListener('click', async function(event) {
             if (!nameInput.value || !authorInput.value)
             {
-                alert("All fields must be provided!");
+                alert("Input name and author of song");
             }
             else if(file)
             {
                 let storageRef = firebase.storage().ref('song_mp3/id'+song_id+'.mp3');
                 storageRef.put(file);
 
-                if(picture)
+                if(picture && picture != "null")
                 {
                     let storageRef = firebase.storage().ref('song_pic/id'+pic_id+'.png');
                     storageRef.put(picture);
                 }
 
-                const rbs = document.querySelectorAll('.genre-selection');
+                const genres = document.querySelectorAll('.genre-selection');
                 let selectedValue = 'none';
-                for (const rb of rbs) {
-                    if (rb.checked) {
-                        selectedValue = rb.value;
+                for (const genre of genres) {
+                    if (genre.checked) {
+                        selectedValue = genre.value;
                         break;
                     }
                 }
-                console.log(selectedValue);
                 if(lyricsInput.value)
                 {
                     song_lyric = lyricsInput.value;

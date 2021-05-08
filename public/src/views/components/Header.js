@@ -9,21 +9,22 @@ let Header = {
                     <p id="user" class="header-button">check</p>
                     <button id="logout" class="header-button" style="border: 0;cursor: pointer;">Logout</button>
 
-                    <a id="login_btn" class="header-button" href="/#/login">Login</a>
-                    <a id="register_btn" class="header-button" href="/#/registration">Register</a>
+                    <a id="login_btn" class="header-button" href="#/login">Login</a>
+                    <a id="register_btn" class="header-button" href="#/registration">Register</a>
                 </div>
                 `
         return view
     },
     after_render: async() => { 
-        let login = document.getElementById("login_btn");
-        let register = document.getElementById("register_btn");
-        let user = document.getElementById("user");
-        let logout = document.getElementById("logout");
-        
+        const login = document.getElementById("login_btn");
+        const register = document.getElementById("register_btn");
+        const user = document.getElementById("user");
+        const logout = document.getElementById("logout");
+        const searchInput = document.getElementById("header-search");
+            
         logout.addEventListener('click', c => {
             firebase.auth().signOut();
-            console.log("OK");
+            console.log("Logout");
         })
 
         firebase.auth().onAuthStateChanged(User => {
@@ -45,13 +46,11 @@ let Header = {
             }
         });
 
-        const searchInput = document.getElementById("header-search");
         searchInput.addEventListener("keyup", function(event)
         {
             if(event.keyCode === 13)
             {
                 event.preventDefault();
-                console.log("#/search/"+searchInput.value);
                 document.location.href = "#/search/"+searchInput.value;
             }
         })

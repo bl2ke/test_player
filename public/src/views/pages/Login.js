@@ -22,7 +22,7 @@ let Login = {
             console.log(email);
 
             firebase.auth().signInWithEmailAndPassword(email, password)
-            .then(function(regUser){
+            .then(function(userCredential){
                 window.location.href = '#/';
             })
             .catch(error => alert(error.message));

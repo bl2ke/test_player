@@ -1,3 +1,5 @@
+import * as DB from './../../services/DB.js'
+
 let Register = {
     render: async() => {
         let view =`
@@ -29,12 +31,19 @@ let Register = {
                 alert('The passwords dont match');
             } 
             else{
-                firebase.auth().createUserWithEmailAndPassword(email.value,password.value)
-                .then(async function(regUser){
+                firebase.auth().createUserWithEmailAndPassword(email.value, password.value)
+                .then(async function(userCredential){
                 console.log("reg")
-                //let lastUser = await DBGet.getUserId();
-                //await firebase.database().ref("/play_queue/" + lastUser).set({ user : email.value});
-                //await firebase.database().ref('/user_count/id').set(lastUser + 1);
+                let user = userCredential.user;
+
+                let count = await DB.getItems('user');
+                let id = count.length;
+                console.log("Кол-во пользователей:", count.length);
+                await firebase.database().ref('user/' + id).set({
+                    id : user.uid,
+                    email : user.email
+                })
+                
                 window.location.href="#/";
                 })
                 .catch(error => alert(error.message));

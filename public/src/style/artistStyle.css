@@ -30,3 +30,11 @@
 .description-text{
     font-weight: 500;
 }
+
+@media screen and (max-device-width:720px)
+{
+	.artist-item{
+        width: 40%;
+    }
+
+}

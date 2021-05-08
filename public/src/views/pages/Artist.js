@@ -9,9 +9,9 @@ let Artist = {
         <section class="playlist-container">
         <div class="playlist-header">
             <div class="playlist-header-img">
-                <button class="playlist-play-button">
+                <button id="play-all" class="playlist-play-button">
                     <img id="artist-img" class="playlist-image" src="src/img/empty_image.png">
-                    <img class="playlist-play" src="src/img/Play.png">
+                    <img class="playlist-play" src="src/img/play.png">
                 </button>
             </div>
             <div class="playlist-info">
@@ -42,36 +42,30 @@ let Artist = {
     after_render: async() => {
 
         let request = Utils.parseRequestURL()
-        let query = decodeURIComponent(request.id);
 
-        const h1 =  document.getElementById('artist-name');
+        const query = decodeURIComponent(request.id)
+        const artistName =  document.getElementById('artist-name');
         const pic = document.getElementById('artist-img');
         const lyrics = document.getElementById('song-lyrics');
-        const searchContainer = document.getElementById('artist-songs');
+        const artistSongs = document.getElementById('artist-songs');
         const modal = document.getElementById('myModal');
         const span = document.getElementById("close");
-
-        let artistRealName = query;
-        h1.innerHTML = artistRealName;
+        const playArtist = document.getElementById('play-all')
         
 
         let artistsList = await DB.getItems('artists');
             artistsList.forEach(async function(artist){
-                console.log(artist.name.toLowerCase());
                 if(artist.name.toLowerCase() === query.toLowerCase()){
-                    h1.innerHTML = artist.name;
+                    artistName.innerHTML = artist.name;
                     let picUrl = await DB.getArtistPic(artist.art_pic_id);
                     pic.src = picUrl;
                 }
-            },
-            function(e){
-                console.log(e.code);
             });
 
         let songsList = await DB.getItems('songs');
-        songsList.forEach(async function(itemRef, index){
-            if(itemRef.author.toLowerCase().includes(query.toLowerCase())){
-                let picUrl = await DB.getSongPic(itemRef.picture);
+        songsList.forEach(async function(song, index){
+            if(song.author.toLowerCase().includes(query.toLowerCase())){
+                let picUrl = await DB.getSongPic(song.picture);
                 let songLi = document.createElement('li');
                 songLi.className = 'playlist-songs-item';
                 songLi.innerHTML = 
@@ -80,40 +74,41 @@ let Artist = {
                     <div class="playlist-song-image">
                         <button class="song-play-button">
                             <img class="song-image" src=${picUrl}>
-                            <img id=${index} class="song-play-image" src="src/img/Play.png">
+                            <img id=${index} class="song-play-image" src="src/img/play.png">
                         </button>
                     </div>
-                    <p class="song-name">${itemRef.name}</p>
-                    <a href="#/artist/${itemRef.author}" class="song-author">${itemRef.author}</a>
+                    <p class="song-name">${song.name}</p>
+                    <a href="#/artist/${song.author}" class="song-author">${song.author}</a>
                 </div>
                 <div class="playlist-song-duration">
-                    <p class="duration">2:33</p>
                     <button id=${index} class="song-text-button">
                         <img id="text-${index}" class="song-text" src="src/img/text.png">
                     </button>
                 </div>
                 `;
-                searchContainer.appendChild(songLi);
+                artistSongs.appendChild(songLi);
             }
-            console.log(itemRef.author);
-        },
-        function(e){
-                console.log(e.code);
         });
        
-        searchContainer.addEventListener("click", async function(e)
+        artistSongs.addEventListener("click", async function(e)
         {
             if(e.target.id.includes("text"))
             {
+                console.log("Кнопка текста");
                 let id = e.target.id.split("-")[1];
-                let song = await DB.getItems('songs/'+ id);
-                //console.log(song); 
+                let song = await DB.getItems('songs/'+ id); 
                 lyrics.innerHTML = song.lyrics;           
                 modal.style.display = "block";
             }
             if(e.target.className == "song-play-image")
             {
                 console.log("Кнопка воспроизведения");
+                if(firebase.auth().currentUser){
+                    console.log("воспроизведение");
+                    DB.pushPlaylist(firebase.auth().currentUser.email, [e.target.id]);
+                }else{
+                    alert("login first");
+                }
             }
         })
 
@@ -126,6 +121,15 @@ let Artist = {
                 modal.style.display = "none";
             }
         }
+
+        playArtist.addEventListener('click', async function(e){
+            if(firebase.auth().currentUser){
+                let list = await DB.getArtistList(query);
+                DB.pushPlaylist(firebase.auth().currentUser.email, list);
+            }else{
+                alert('Login first');
+            }
+        });
     }
 
     

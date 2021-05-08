@@ -12,6 +12,7 @@ import Search from './src/views/pages/Search.js'
 import Artist from './src/views/pages/Artist.js'
 import Genre from './src/views/pages/Genre.js'
 import Album from './src/views/pages/Album.js'
+import PlaylistEdit from './src/views/pages/PlaylistEdit.js'
 
 const routes = {
     '/' : Home,
@@ -21,6 +22,9 @@ const routes = {
     '/registration' : Register,
     '/createplaylist' : CreatePlaylist,
     '/playlist' : Playlist,
+    '/playlist/:id' : Playlist,
+    '/playlistedit' : PlaylistEdit,
+    '/playlistedit/:id' : PlaylistEdit,
     '/search' : Search,
     '/search/:id' : Search,
     '/artist' : Artist,
@@ -33,10 +37,10 @@ const routes = {
 
 const router = async() => {
 
-    const header = null || document.getElementById('header');
-    const main = null || document.getElementById('main');
-    const footer = null || document.getElementById('footer');
-    const player = null || document.getElementById('player');
+    const header = document.getElementById('header');
+    const main = document.getElementById('main');
+    const footer = document.getElementById('footer');
+    const player = document.getElementById('audio');
 
     header.innerHTML = await Header.render();
     await Header.after_render();
@@ -47,19 +51,36 @@ const router = async() => {
 
     let url = Utils.parseRequestURL();
 
-    let parsedURL2 = 
-       routes[location.hash.slice(1).toLowerCase() || '/'] ? (location.hash.slice(1).toLowerCase() || '/') :
-    ((url.resourse ? '/' + url.resourse : '/') + (url.id ? '/:id' : '') + (url.verb ? '/' + url.verb : ''))
-    console.log("Первый урл: ",parsedURL2)
+    let parsedURL = (url.resourse ? '/' + url.resourse : '/') + (url.id ? '/:id' : '') + (url.verb ? '/' + url.verb : '')
 
-    let page = routes[parsedURL2];
-    console.log(page);
+    let page = routes[parsedURL];
+
     main.innerHTML = await page.render();
     await page.after_render();
 
+}
 
+const router_without_player = async() => {
+
+    const header = document.getElementById('header');
+    const main = document.getElementById('main');
+    const footer = document.getElementById('footer');
+
+    header.innerHTML = await Header.render();
+    await Header.after_render();
+    footer.innerHTML = await Footer.render();
+    await Footer.after_render();
+
+    let url = Utils.parseRequestURL();
+
+    let parsedURL = (url.resourse ? '/' + url.resourse : '/') + (url.id ? '/:id' : '') + (url.verb ? '/' + url.verb : '')
+
+    let page = routes[parsedURL];
+    //console.log(page);
+    main.innerHTML = await page.render();
+    await page.after_render();
 
 }
 
 window.addEventListener('load', router);
-window.addEventListener('hashchange', router);
+window.addEventListener('hashchange', router_without_player);

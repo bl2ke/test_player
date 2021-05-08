@@ -6,8 +6,7 @@ let Search = {
 
         return `
         <section class="search-results-section">
-            <h2 id="section-search-h2" class="sections-text">Song search</h2>
-            <div class="description-text">Founded songs across all uploaded... </div>
+            <h1 id="section-search-h1" class="sections-text">Song search</h1>
             <ul id="search-results" class="playlist-songs"></ul> 
             <div id="myModal" class="modal">
                 <div class="modal-header">
@@ -25,19 +24,19 @@ let Search = {
 
     after_render: async() => {
         let request = Utils.parseRequestURL();
-        let query = decodeURIComponent(request.id);
-        const h2 = document.getElementById('section-search-h2');
+        
+        const result = document.getElementById('section-search-h1');
         const lyrics = document.getElementById('song-lyrics');
         const searchContainer = document.getElementById("search-results");
-        var modal = document.getElementById('myModal');
-        var span = document.getElementById("close");
+        const modal = document.getElementById('myModal');
+        const span = document.getElementById("close");
 
-        h2.innerHTML = "Results for " + query;
+        result.innerHTML = "Results for " + request.id;
     
-        const songList2 = await DB.getItems('songs');
-        songList2.forEach(async function(song, index)
+        const songList = await DB.getItems('songs');
+        songList.forEach(async function(song, index)
             {
-                if(song.name.toLowerCase().includes(query) || song.author.toLowerCase().includes(query))
+                if(song.name.toLowerCase().includes(request.id) || song.author.toLowerCase().includes(request.id))
                 {
                     let picUrl = await DB.getSongPic(song.picture);
                     let songLi = document.createElement("li");
@@ -48,14 +47,13 @@ let Search = {
                                 <div class="playlist-song-image">
                                     <button class="song-play-button">
                                         <img class="song-image" src=${picUrl}>
-                                        <img id=${index} class="song-play-image" src="src/img/Play.png">
+                                        <img id=${index} class="song-play-image" src="src/img/play.png">
                                     </button>
                                 </div>
                                 <p class="song-name">${song.name}</p>
                                 <a href="#/artist/${song.author}" class="song-author">${song.author}</a>
                             </div>
                             <div class="playlist-song-duration">
-                                <p class="duration">2:33</p>
                                 <button id=${index} class="song-text-button">
                                     <img id="text-${index}" class="song-text" src="src/img/text.png">
                                 </button>
@@ -65,56 +63,26 @@ let Search = {
                 }
             });
 
-        // snapshot.on("value", async function(snapshot){
-        //     let songList = snapshot.val();
-        //     songList.forEach(async function(song, index)
-        //     {
-        //         if(song.name.toLowerCase().includes(query) || song.author.toLowerCase().includes(query))
-        //         {
-        //             const picUrl = await DB.getSongPic(song.picture);
-        //             let songLi = document.createElement("li");
-        //             songLi.className = "playlist-songs-item"
-        //             songLi.innerHTML = 
-        //             `
-        //                     <div class="playlist-song">
-        //                         <div class="playlist-song-image">
-        //                             <button class="song-play-button">
-        //                                 <img class="song-image" src=${picUrl}>
-        //                                 <img id=${index} class="song-play-image" src="src/img/Play.png">
-        //                             </button>
-        //                         </div>
-        //                         <p class="song-name">${song.name}</p>
-        //                         <a href="#/artist/${song.author}" class="song-author">${song.author}</a>
-        //                     </div>
-        //                     <div class="playlist-song-duration">
-        //                         <p class="duration">2:33</p>
-        //                         <button id=${index} class="song-text-button">
-        //                             <img id="text-${index}" class="song-text" src="src/img/text.png">
-        //                         </button>
-        //                     </div>
-        //             `;
-        //             searchContainer.appendChild(songLi);
-        //         }
-        //     });
-        // }),function(e){
-        //     console.log("Fail:",e.code);
-        // }
 
-        console.log("Проверка")
-        // добавить воспроизвидение по кнопке
         searchContainer.addEventListener("click", async function(e)
         {
             if(e.target.id.includes("text"))
             {
+                console.log("Кнопка текста");
                 let id = e.target.id.split("-")[1];
                 let song = await DB.getItems('songs/'+ id);
-                //console.log(song); 
                 lyrics.innerHTML = song.lyrics;           
                 modal.style.display = "block";
             }
             if(e.target.className == "song-play-image")
             {
                 console.log("Кнопка воспроизведения");
+                if(firebase.auth().currentUser){
+                    console.log("воспроизведение");
+                    DB.pushPlaylist(firebase.auth().currentUser.email, [e.target.id]);
+                }else{
+                    alert("login first");
+                }
             }
         })
 

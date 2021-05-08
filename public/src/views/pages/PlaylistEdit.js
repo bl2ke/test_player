@@ -1,11 +1,11 @@
 import Utils from './../../services/Utils.js'
 import * as DB from './../../services/DB.js'
 
-let CreatePlaylist = {
+let PlaylistEdit = {
     render: async() => {
         let view =`
             <section class="playlist-container">
-                <h1 class="edit-header">Creating playlist</h1>
+                <h1 class="edit-header">Editing playlist</h1>
                 <div>
                     <div class="playlist-edit-header">
                         <div class="playlist-header-img">
@@ -50,41 +50,45 @@ let CreatePlaylist = {
     },
 
     after_render: async() => {
+        let request = Utils.parseRequestURL()
+        let playlistId = request.id;
 
-        const header =  document.getElementById('playlist-name-input-id');
+        const playlistName =  document.getElementById('playlist-name-input-id');
         const desc = document.getElementById('playlist-desc-input-id');
-        const pic = document.getElementById('img-playlist-on-page');
-        const searchSongs = document.getElementById('search-results-ol');
+
+        const playlistPic = document.getElementById('img-playlist-on-page');
+        const searchContainer = document.getElementById('search-results-ol');
         const searchInput = document.getElementById('playlist-search-input');
         const saveButton = document.getElementById('playlist-save-button');
         const deleteButton = document.getElementById('playlist-delete-button');
         const uploadPic = document.getElementById('upload-file-button');
-        const songsContainer = document.getElementById('playlist-songs-list');
-        let playlistPic;
-        let playlistTest = await DB.getItems('playlists');
-        let id = playlistTest.length;
+        const playlistSongs = document.getElementById('playlist-songs-list');
 
-        firebase.database().ref('/playlists/' + id).set({
-            id : id,
-            name : "Name",
-            description : "Description",
-            playlist_pic : "null",
-            songs : [],
+        let songsArray = [];
+
+        let snapshot = await firebase.database().ref('/playlists/' + playlistId);
+
+        snapshot.on('value', async function(snapshot)
+        {
+            let playlist = snapshot.val();
+            console.log(playlist);
+            playlistName.value = playlist.name;
+            desc.value = playlist.description;
+            let picUrl = await DB.getPlaylistPic(playlist.playlist_pic);
+            playlistPic.src = picUrl;
+            songsArray = playlist.songs;
+            await updatePlaylistSongs();
         })
-
-        let songSnapshot1 = await firebase.database().ref('/playlists/' + id + '/songs/').once('value');
-        let songsArray = songSnapshot1.val() || [];
-
+        
 
         async function updatePlaylistSongs()
         {
-            songsContainer.innerHTML = "";
+            playlistSongs.innerHTML = "";
             
             if(songsArray)
                 {
-                    songsArray.forEach(async function(item)
+                    songsArray.forEach(async function(songId, index)
                     {
-                        let songId = item;
                         let songSnapshot = await firebase.database().ref('/songs/' + songId).once('value');
                         let song = songSnapshot.val();
 
@@ -105,50 +109,22 @@ let CreatePlaylist = {
                             <a href="#/artist/${song.author}" class="song-author">${song.author}</a>
                         </div>
                         <div class="playlist-song-duration">
-                            <p class="duration">2:33</p>
                             <button id=${songId} class="song-text-button">
                                 <img id="text-${songId}" class="song-delete" src="src/img/delete.png">
                             </button>
                         </div>
                         `;
-                        songsContainer.appendChild(playlistLi);
+                        playlistSongs.appendChild(playlistLi);
                     })
                 }
         }
         
-        songsContainer.addEventListener("click", async function(e) {
-            console.log(e.target.nodeName);
-
-            if(e.target.id.includes("text"))
-            {
-                console.log(e.target.id.split('-')[1]);
-                songsArray.splice(songsArray.indexOf(e.target.id.split('-')[1]),1);
-                console.log(songsArray);
-                await updatePlaylistSongs()
-            }
-            if(e.target.className == "song-play-image")
-            {
-                console.log("Кнопка воспроизведения");
-            }
-        });
-
-        searchSongs.addEventListener('click', async function(event)
-        {
-            if(event.target && event.target.nodeName == "LI") {
-                console.log(event.target.id + " was clicked");
-                songsArray.push(event.target.id);
-                console.log(songsArray);
-                await updatePlaylistSongs();
-            }
-        })
-
-        await updatePlaylistSongs();
-
+    
         searchInput.addEventListener('keyup', async function(event)
         {
             let query = searchInput.value.toLowerCase();
             let songList = await DB.getItems('songs');
-            searchSongs.innerHTML = "";
+            searchContainer.innerHTML = "";
             songList.forEach(async function(song, index)
             {
                 if(song.name.toLowerCase().includes(query) || song.author.toLowerCase().includes(query))
@@ -169,50 +145,64 @@ let CreatePlaylist = {
                         <p class="song-name">${song.name}</p>
                         <a href="#/artist/${song.author}" class="song-author">${song.author}</a>
                     </div>
-
                     `;
-                    searchSongs.appendChild(songLi);
+                    searchContainer.appendChild(songLi);
                 };
                 
             });
         });
 
+        playlistSongs.addEventListener("click", async function(e) {
+            console.log(e.target.nodeName);
+
+            if(e.target.id.includes("text"))
+            {
+                console.log(e.target.id.split('-')[1]);
+                songsArray.splice(songsArray.indexOf(e.target.id.split('-')[1]),1);
+                console.log(songsArray);
+                await updatePlaylistSongs()
+            }
+            if(e.target.className == "song-play-image")
+            {
+                console.log("Кнопка воспроизведения");
+            }
+        });
+
+        searchContainer.addEventListener('click', async function(event)
+        {
+            if(event.target && event.target.nodeName == "LI") {
+                console.log(event.target.id + " was clicked");
+                songsArray.push(event.target.id);
+                console.log(songsArray);
+                await updatePlaylistSongs();
+            }
+        })
 
         saveButton.addEventListener('click', async function(e)
         {
-            songsContainer.innerHTML = "";
-            console.log(playlistPic);
-            if(playlistPic)
-            {
-                playlistPic = id;
-            }
-            else
-            {
-                playlistPic = "null";
-            }
-            firebase.database().ref('playlists/' + id).set({
-                id : id,
-                name : header.value,
+            playlistSongs.innerHTML = "";
+            firebase.database().ref('playlists/' + playlistId).set({
+                id : playlistId,
+                name : playlistName.value,
                 description : desc.value,
                 songs : songsArray,
-                playlist_pic : playlistPic,
+                playlist_pic : playlistId,
                 author : firebase.auth().currentUser.email
-            },function(e)
-            {
-            if(e)
-            {
-                console.log(e.code);
-            }
-            else{
-                document.location.href ="#/";
-                alert("Playlist has been created!");
-            }
-            })
+            },function(e){
+                if(e)
+                {
+                    console.log(e.code);
+                }
+                else{
+                    document.location.href ="#/";
+                    alert("Playlist has been changed!");
+                }
+                })
         });
 
         deleteButton.addEventListener("click", async function(e)
         {
-            firebase.database().ref('playlists/' + id).remove();
+            firebase.database().ref('playlists/' + playlistId).remove();
             document.location.href ="#/";
             
         });
@@ -220,16 +210,17 @@ let CreatePlaylist = {
         uploadPic.addEventListener('change', async function(e)
         {
             let file = e.target.files[0];
-            let storageRef = firebase.storage().ref('playlist_pic/id' + id + '.png');
-            playlistPic = id;
+            let storageRef = firebase.storage().ref('playlist_pic/id' + playlistId + '.png');
             await storageRef.put(file);
-
-            let picUrl = await DB.getPlaylistPic(id);
-            pic.src = picUrl;
+            let picUrl = await DB.getPlaylistPic(playlistId);
+            playlistPic.src = picUrl;
         });
+
         
     }
-  
+
+
+    
 }
 
-export default CreatePlaylist;
+export default PlaylistEdit;
